@@ -1,5 +1,24 @@
-let collect_dates = () => {
-    let periods = [];
+const months = {
+    0: "Jan",
+    1: "Feb",
+    2: "Mar",
+    3: "Apr",
+    4: "May",
+    5: "Jun",
+    6: "Jul",
+    7: "Aug",
+    8: "Sep",
+    9: "Oct",
+    10: "Nov",
+    11: "Dec",
+}
+
+let formatDate = (date) => {
+    return months[date.getUTCMonth()] + " " + date.getUTCDate() + ", " + date.getUTCFullYear();
+}
+
+let collectDates = () => {
+    const periods = [];
     let undefinedEntry = "";
     let undefinedExit = "";
     d3.selectAll('.period-entry')
@@ -69,10 +88,106 @@ let collect_dates = () => {
             periods.push(period);
         });
     periods.sort();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const windowSize = 180;
+    const dayLimit = 90;
+    const messages = []
+    for (const [start, end] of periods) {
+        if (start && end) {
+            const entryWindow = new Date();
+            entryWindow.setTime(start.getTime() - (windowSize * oneDay));
+            let days = 0;
+            for (const [prevStart, prevEnd] of periods) {
+                if (
+                    prevStart 
+                        && prevStart !== start
+                        && prevEnd 
+                        && prevEnd !== end
+                        && prevStart < start 
+                        && entryWindow < prevEnd
+                ) {
+                    let adjustedStart = Math.max(prevStart, entryWindow);
+                    days += (prevEnd - adjustedStart) / oneDay + 1;
+                }
+            }
+            if (days < dayLimit) {
+                let remainingDays = dayLimit - days;
+                let plural = "";
+                if (remainingDays !== 1) { plural = "s"; }
+                let lastDay = new Date();
+                lastDay.setTime(start.getTime() + (remainingDays - 1) * oneDay);
+                let firstDay = new Date();
+                firstDay.setTime(end.getTime() - (remainingDays - 1) * oneDay);
+                if (end > lastDay) {
+                    messages.push(`The period from ${formatDate(start)} to ${formatDate(end)} is too long. On ${formatDate(start)} you will have ${remainingDays} day${plural} of eligibility. Thus, you must either enter on or after ${formatDate(firstDay)} or exit on or before ${formatDate(lastDay)}.`)
+                }
+            }
+        }
+    }
+    if (undefinedEntry) {
+        const entryWindow = new Date();
+        entryWindow.setTime(undefinedEntry.getTime() - (windowSize * oneDay));
+        let days = 0;
+        for (const [prevStart, prevEnd] of periods) {
+            if (
+                prevStart 
+                    && prevEnd
+                    && prevStart !== undefinedEntry
+                    && prevEnd > entryWindow
+            ) {
+                let adjustedStart = Math.max(prevStart, entryWindow);
+                days += (prevEnd - adjustedStart) / oneDay + 1;
+            }
+        }
+        let message = "";
+        if (days < dayLimit) {
+            let remainingDays = dayLimit - days;
+            let lastDay = new Date();
+            lastDay.setTime(undefinedEntry.getTime() + (remainingDays - 1) * oneDay);
+            message = `You can enter at ${formatDate(undefinedEntry)} and leave on or before ${formatDate(lastDay)} without running out of elibility.`;
+        } else {
+            message = `You will not have enough eligibility to have a period that starts on ${formatDate(undefinedEntry)}`;
+        }
+        messages.push(message);
+    }
+    if (undefinedExit) {
+        const exitWindow = new Date();
+        exitWindow.setTime(undefinedExit.getTime() + (windowSize * oneDay));
+        let days = 0;
+        for (const [nextStart, nextEnd] of periods) {
+            if (
+                nextStart 
+                    && nextEnd 
+                    && nextEnd !== undefinedExit
+                    && nextStart < exitWindow
+            ) {
+                let adjustedEnd = Math.min(nextEnd, exitWindow);
+                days += (adjustedEnd - nextStart) / oneDay + 1;
+            }
+        }
+        let message = "";
+        if (days < dayLimit) {
+            let remainingDays = dayLimit - days;
+            let firstDay = new Date();
+            firstDay.setTime(undefinedExit.getTime() - (remainingDays - 1) * oneDay);
+            message = `You can enter at any day on or after ${formatDate(firstDay)} and exit ${formatDate(undefinedExit)} without running out of elibility.`;
+        } else {
+            message = `You will not have enough eligibility to have a period that ends on ${formatDate(undefinedExit)}`;
+        }
+        messages.splice(0, 0, message);
+    }
+    if (messages.length === 0) {
+        messages.push("No problems!")
+    }
     d3.select('#results-list').remove();
-    d3.select("results")
+    d3.select("#results")
         .append("div")
-            .attr('id', 'results-list');
+            .attr('id', 'results-list')
+        .selectAll('div.results-entry')
+        .data(messages)
+        .join('div')
+            .attr('class', 'results-entry')
+            .text(d => d)
         
 }
 
@@ -88,7 +203,7 @@ d3.select("#add-period-button").on(
                     .attr('class', 'enter-input')
                     .attr('type', "date")
                     .on('change', (event) => {
-                        collect_dates();
+                        collectDates();
                     })
                 )
                 .call(d => d.append("span")
@@ -98,7 +213,7 @@ d3.select("#add-period-button").on(
                     .attr('class', 'exit-input')
                     .attr('type', "date")
                     .on('change', (event) => {
-                        collect_dates();
+                        collectDates();
                     })
                 )
                 .call(d => d.append('button')
@@ -107,7 +222,7 @@ d3.select("#add-period-button").on(
                     .on('click', (event) => {
                         d3.select(event.target.parentNode)
                             .remove();
-                        collect_dates();
+                        collectDates();
                     })
                 );
     }

@@ -20,7 +20,7 @@ button {
     width: 450px;
 }
 
-.period-entry {
+.period-entry, .results-entry {
     margin: 5px 0;
     padding: 3px;
 }
