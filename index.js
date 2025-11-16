@@ -22,6 +22,7 @@ let collectDates = () => {
     const periods = [];
     let undefinedEntry = "";
     let undefinedExit = "";
+    let lastDate = "";
     let hasIssue = false;
     d3.selectAll('.period-entry')
         .each(function() {
@@ -91,6 +92,8 @@ let collectDates = () => {
                     return;
                 }
             }
+            if (!lastDate) lastDate = exit;
+            else lastDate = Math.max(exit, lastDate);
             periods.push(period);
         });
     if (hasIssue) {
@@ -109,8 +112,8 @@ let collectDates = () => {
     const messages = []
     for (const [start, end] of periods) {
         if (start && end) {
-            const entryWindow = new Date();
-            entryWindow.setTime(start.getTime() - (windowSize * oneDay));
+            const exitWindow = new Date();
+            exitWindow.setTime(end.getTime() - (windowSize * oneDay));
             let days = 0;
             for (const [prevStart, prevEnd] of periods) {
                 if (
@@ -119,9 +122,9 @@ let collectDates = () => {
                         && prevEnd 
                         && prevEnd !== end
                         && prevStart < start 
-                        && entryWindow < prevEnd
+                        && exitWindow < prevEnd
                 ) {
-                    let adjustedStart = Math.max(prevStart, entryWindow);
+                    let adjustedStart = Math.max(prevStart, exitWindow);
                     days += (prevEnd - adjustedStart) / oneDay + 1;
                 }
             }
@@ -141,13 +144,12 @@ let collectDates = () => {
     }
     if (undefinedEntry) {
         const entryWindow = new Date();
-        entryWindow.setTime(undefinedEntry.getTime() - (windowSize * oneDay));
+        entryWindow.setTime(undefinedEntry.getTime() - ((windowSize - dayLimit) * oneDay));
         let days = 0;
         for (const [prevStart, prevEnd] of periods) {
             if (
                 prevStart 
                     && prevEnd
-                    && prevStart !== undefinedEntry
                     && prevEnd > entryWindow
             ) {
                 let adjustedStart = Math.max(prevStart, entryWindow);
@@ -173,7 +175,6 @@ let collectDates = () => {
             if (
                 nextStart 
                     && nextEnd 
-                    && nextEnd !== undefinedExit
                     && nextStart < exitWindow
             ) {
                 let adjustedEnd = Math.min(nextEnd, exitWindow);
