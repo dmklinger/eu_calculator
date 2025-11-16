@@ -18,6 +18,7 @@ let formatDate = (date) => {
 }
 
 let collectDates = () => {
+    d3.select('#results-list').remove();
     const periods = [];
     let undefinedEntry = "";
     let undefinedExit = "";
@@ -179,7 +180,6 @@ let collectDates = () => {
     if (messages.length === 0) {
         messages.push("No problems!")
     }
-    d3.select('#results-list').remove();
     d3.select("#results")
         .append("div")
             .attr('id', 'results-list')
