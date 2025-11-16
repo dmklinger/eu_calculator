@@ -100,6 +100,7 @@ let collectDates = () => {
             .append('div')
                 .attr('id', 'results-entry')
                 .text("Please fix the issues on the periods first.")
+        return;
     }
     periods.sort();
     const oneDay = 24 * 60 * 60 * 1000;
