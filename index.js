@@ -159,7 +159,7 @@ let collectDates = () => {
             let remainingDays = dayLimit - days;
             let lastDay = new Date();
             lastDay.setTime(undefinedEntry.getTime() + (remainingDays - 1) * oneDay);
-            message = `You can enter at ${formatDate(undefinedEntry)} and leave on or before ${formatDate(lastDay)} without running out of elibility.`;
+            message = `You can enter on ${formatDate(undefinedEntry)} and leave on or before ${formatDate(lastDay)} without running out of elibility.`;
         } else {
             message = `You will not have enough eligibility to have a period that starts on ${formatDate(undefinedEntry)}`;
         }
@@ -185,13 +185,13 @@ let collectDates = () => {
             let remainingDays = dayLimit - days;
             let firstDay = new Date();
             firstDay.setTime(undefinedExit.getTime() - (remainingDays - 1) * oneDay);
-            message = `You can enter at any day on or after ${formatDate(firstDay)} and exit ${formatDate(undefinedExit)} without running out of elibility.`;
+            message = `You can enter any day on or after ${formatDate(firstDay)} and exit ${formatDate(undefinedExit)} without running out of elibility.`;
         } else {
             message = `You will not have enough eligibility to have a period that ends on ${formatDate(undefinedExit)}`;
         }
         messages.splice(0, 0, message);
     }
-    if (messages.length === 0) {
+    if (messages.length === 0 && periods.length > 0) {
         messages.push("No problems!")
     }
     d3.select("#results")
