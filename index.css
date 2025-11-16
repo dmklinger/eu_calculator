@@ -17,13 +17,18 @@ button {
 }
 
 #add-period-button {
-    width: 326px;
+    width: 450px;
 }
 
 .period-entry {
     margin: 5px 0;
+    padding: 3px;
 }
 
 .period-entry > * {
     margin: 0 3px;
+}
+
+input {
+    width: 150px;
 }
