@@ -1,0 +1,29 @@
+* {
+    font-family: sans-serif;
+}
+
+#periods, #results {
+    margin: 5px;
+}
+
+.header {
+    padding: 5px;
+    font-size: 18px;
+}
+
+button {
+    margin: 5px;
+    padding: 3px 5px;
+}
+
+#add-period-button {
+    width: 326px;
+}
+
+.period-entry {
+    margin: 5px 0;
+}
+
+.period-entry > * {
+    margin: 0 3px;
+}
