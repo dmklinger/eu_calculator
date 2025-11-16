@@ -22,6 +22,7 @@ let collectDates = () => {
     const periods = [];
     let undefinedEntry = "";
     let undefinedExit = "";
+    let hasIssue = false;
     d3.selectAll('.period-entry')
         .each(function() {
             d3.select(this)
@@ -46,6 +47,7 @@ let collectDates = () => {
                     .append('span')
                         .attr('id', 'period-entry-message')
                         .text('Entry date is after exit date');
+                hasIssue = true;
                 return;
             }
             if (!enter && exit) {
@@ -55,6 +57,7 @@ let collectDates = () => {
                         .append('span')
                             .attr('id', 'period-entry-message')
                             .text('You already have a period with no entry date');
+                    hasIssue = true;
                     return;
                 }
                 undefinedExit = exit;
@@ -66,6 +69,7 @@ let collectDates = () => {
                         .append('span')
                             .attr('id', 'period-entry-message')
                             .text('You already have a period with no exit date');
+                    hasIssue = true;
                     return;
                 }
                 undefinedEntry = enter;
@@ -83,11 +87,20 @@ let collectDates = () => {
                         .append('span')
                             .attr('id', 'period-entry-message')
                             .text('This period overlaps a previous period');
+                    hasIssue = true;
                     return;
                 }
             }
             periods.push(period);
         });
+    if (hasIssue) {
+        d3.select("#results")
+            .append("div")
+                .attr('id', 'results-list')
+            .append('div')
+                .attr('id', 'results-entry')
+                .text("Please fix the issues on the periods first.")
+    }
     periods.sort();
     const oneDay = 24 * 60 * 60 * 1000;
     const windowSize = 180;
