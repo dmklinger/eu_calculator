@@ -3,6 +3,10 @@
     font-size: 24px;
 }
 
+body {
+    max-width: 800px;
+}
+
 #periods, #results {
     margin: 5px;
 }
@@ -18,7 +22,7 @@ button {
 }
 
 #add-period-button {
-    width: 800px;
+    width: 500px;
 }
 
 .period-entry, .results-entry {
@@ -31,5 +35,5 @@ button {
 }
 
 input {
-    width: 250px;
+    width: 200px;
 }
